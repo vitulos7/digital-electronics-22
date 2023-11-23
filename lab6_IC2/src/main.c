@@ -25,6 +25,7 @@
 #include <twi.h>            // I2C/TWI library for AVR-GCC
 #include <uart.h>           // Peter Fleury's UART library
 #include <stdlib.h>         // C library. Needed for number conversions
+#include <oled.h>           // OLED
 
 
 /* Global variables --------------------------------------------------*/
@@ -74,11 +75,42 @@ int main(void)
         while (1);
     }
 
+
+
+    //OLED
+
+    // char string[2];  // String for converting numbers by itoa()
+
+    // TWI
+    twi_init();
+
+    oled_init(OLED_DISP_ON);
+    oled_clrscr();
+
+    oled_charMode(DOUBLESIZE);
+    // oled_puts("OLED disp.");
+
+    oled_charMode(NORMALSIZE);
+
+    // oled_gotoxy(x, y)
+    oled_gotoxy(0, 2);
+    // oled_puts("128x64, SHH1106");
+
+    // oled_drawLine(x1, y1, x2, y2, color)
+    oled_drawLine(0, 25, 120, 25, WHITE);
+
+    oled_gotoxy(0, 1);
+    oled_puts("Podminky v kvetinaci");
+
+    // Copy buffer to display RAM
+    oled_display();
+
     // Timer1
     TIM1_OVF_1SEC
     TIM1_OVF_ENABLE
 
     sei();
+
 
     // Infinite loop
     while (1) {
@@ -86,9 +118,17 @@ int main(void)
             itoa(dht12.temp_int, string, 10);
             uart_puts(string);
             uart_puts(".");
+
+            oled_gotoxy(0, 4);
+            oled_puts(string);
+            oled_puts(".");
+
             itoa(dht12.temp_dec, string, 10);
             uart_puts(string);
             uart_puts(" °C");
+
+            oled_puts(string);
+            oled_puts(" °C");
 
             // Humidity
             uart_puts("\t");
@@ -98,6 +138,30 @@ int main(void)
             itoa(dht12.hum_dec, string, 10);
             uart_puts(string);
             uart_puts(" %\r\n");
+
+            // Do not print it again and wait for the new data
+            new_sensor_data = 0;    
+
+        }
+
+        if (new_sensor_data == 1) {
+            //itoa(dht12.temp_int, string, 10);
+           // uart_puts(string);
+            //uart_puts(".");
+            //itoa(dht12.temp_dec, string, 10);
+           // uart_puts(string);
+            //uart_puts(" °C");
+
+            // Temperatura
+            oled_gotoxy(0, 5);
+            itoa(dht12.temp_int, string, 10);
+            oled_puts(string);
+            oled_puts(".");
+            itoa(dht12.temp_dec, string, 10);
+            oled_puts(string);
+            oled_puts(" °C");
+
+            // Humidity
 
             // Do not print it again and wait for the new data
             new_sensor_data = 0;
